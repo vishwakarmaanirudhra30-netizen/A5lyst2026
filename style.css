@@ -389,7 +389,7 @@ html {
 /* Floating WhatsApp Button */
 .whatsapp-float {
   position: fixed;
-  bottom: 100px;
+  bottom: 20px;
   right: 30px;
   background-color: #25D366;
   color: white;
@@ -527,7 +527,7 @@ html {
 /* Tic-Tac-Toe Floating Button Style (Updated) */
 .tictactoe-float-btn {
     position: fixed;
-    bottom: 170px;
+    bottom: 85px;
     right: 20px;
     z-index: 9999;
     /* background color hata sakte hain agar logo transparent background wala hai, ya phir ise aise hi rehne dein */
@@ -558,7 +558,7 @@ html {
 /* AI Floating Button Style */
 .ai-float-btn {
     position: fixed;
-    bottom: 240px; /* Tic-Tac-Toe button ke upar */
+    bottom: 150px; /* Tic-Tac-Toe button ke upar */
     right: 20px;
     z-index: 9999;
     /* background color remove kar dein agar logo transparent hai */
