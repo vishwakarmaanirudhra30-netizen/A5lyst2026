@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ---------------------------------------------------------
-    // 1. PDF.JS WORKER SETUP.
+    // 1. PDF.JS WORKER SETUP
     // ---------------------------------------------------------
     if (typeof pdfjsLib !== 'undefined') {
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
@@ -25,9 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const trainerStatus = document.getElementById('trainerStatus');
     const trainedList = document.getElementById('trainedList');
 
-   const ALLOWED_ADMIN_KEYS = ["ani2007", "nih2007", "aryn2007"];
-// Check karte waqt:
-if (!ALLOWED_ADMIN_KEYS.includes(key)) { ... }
+    // FIX 1: Syntax error resolved by using an array for valid secret keys
+    const ALLOWED_ADMIN_KEYS = ["ani2007", "nih2007", "aryn2007"];
 
     // ---------------------------------------------------------
     // 3. HELPER FUNCTIONS (Randomizer & Regex Matcher)
@@ -50,143 +49,134 @@ if (!ALLOWED_ADMIN_KEYS.includes(key)) { ... }
     }
 
     // ---------------------------------------------------------
-   // ---------------------------------------------------------
-// 4. INDEXEDDB MEMORY MANAGEMENT (Replaces LocalStorage)
-// ---------------------------------------------------------
-const DB_NAME = "A5lystDatabase";
-const DB_VERSION = 1;
-let db = null;
+    // 4. INDEXEDDB MEMORY MANAGEMENT
+    // ---------------------------------------------------------
+    const DB_NAME = "A5lystDatabase";
+    const DB_VERSION = 1;
+    let db = null;
 
-// Database Initialize karne ka function
-function initDB() {
-    return new Promise((resolve, reject) => {
-        if (db) {
-            resolve(db);
-            return;
-        }
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-        request.onerror = (event) => {
-            console.error("IndexedDB error:", event.target.error);
-            reject(event.target.error);
-        };
-
-        request.onsuccess = (event) => {
-            db = event.target.result;
-            resolve(db);
-        };
-
-        request.onupgradeneeded = (event) => {
-            const database = event.target.result;
-            // Q&A Store ke liye table/object store
-            if (!database.objectStoreNames.contains('trained_memory')) {
-                database.createObjectStore('trained_memory', { keyPath: 'id' });
+    function initDB() {
+        return new Promise((resolve, reject) => {
+            if (db) {
+                resolve(db);
+                return;
             }
-            // Document chunks ke liye table/object store
-            if (!database.objectStoreNames.contains('doc_memory')) {
-                database.createObjectStore('doc_memory', { keyPath: 'id', autoIncrement: true });
-            }
-        };
-    });
-}
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-// Saara Custom Q&A Data laane ke liye (Async)
-async function getTrainedMemory() {
-    const database = await initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(['trained_memory'], 'readonly');
-        const store = transaction.objectStore('trained_memory');
-        const request = store.getAll();
+            request.onerror = (event) => {
+                console.error("IndexedDB error:", event.target.error);
+                reject(event.target.error);
+            };
 
-        request.onsuccess = () => resolve(request.result || []);
-        request.onerror = () => reject(request.error);
-    });
-}
+            request.onsuccess = (event) => {
+                db = event.target.result;
+                resolve(db);
+            };
 
-// Saara Document Memory Data laane ke liye (Async)
-async function getDocMemory() {
-    const database = await initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(['doc_memory'], 'readonly');
-        const store = transaction.objectStore('doc_memory');
-        const request = store.getAll();
-
-        request.onsuccess = () => {
-            // Kyunki pehle chunks string the, hum unhe map kar lenge
-            const results = request.result || [];
-            resolve(results.map(item => item.chunk));
-        };
-        request.onerror = () => reject(request.error);
-    });
-}
-
-// Q&A Save karne ke liye
-async function saveTrainedMemory(question, answer) {
-    const database = await initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(['trained_memory'], 'readwrite');
-        const store = transaction.objectStore('trained_memory');
-        const item = { id: Date.now(), question, response: answer };
-        const request = store.put(item);
-
-        request.onsuccess = () => {
-            renderTrainedList();
-            resolve();
-        };
-        request.onerror = () => reject(request.error);
-    });
-}
-
-// Document Chunk Save karne ke liye
-async function saveDocChunk(chunkText) {
-    const database = await initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(['doc_memory'], 'readwrite');
-        const store = transaction.objectStore('doc_memory');
-        const request = store.add({ chunk: chunkText });
-
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-    });
-}
-
-// Brain Console me list render karne wala function (Updated for Async)
-async function renderTrainedList() {
-    if (!trainedList) return;
-    const memory = await getTrainedMemory();
-    trainedList.innerHTML = '';
-    
-    if (memory.length === 0) {
-        trainedList.innerHTML = '<p style="font-size: 0.8rem; color: #888;">No custom data available in IndexedDB, Sir/Ma\'am.</p>';
-        return;
-    }
-    
-    memory.forEach((item) => {
-        const div = document.createElement('div');
-        div.className = 'trained-item';
-        div.innerHTML = `
-            <div class="trained-item-info">
-                <strong>Q: ${item.question}</strong>
-                <span>A: ${item.response}</span>
-            </div>
-            <button class="delete-q-btn" data-id="${item.id}">X</button>
-        `;
-        trainedList.appendChild(div);
-    });
-    
-    document.querySelectorAll('.delete-q-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const id = Number(e.target.getAttribute('data-id'));
-            const database = await initDB();
-            const transaction = database.transaction(['trained_memory'], 'readwrite');
-            const store = transaction.objectStore('trained_memory');
-            store.delete(id);
-            transaction.oncomplete = () => {
-                renderTrainedList();
+            request.onupgradeneeded = (event) => {
+                const database = event.target.result;
+                if (!database.objectStoreNames.contains('trained_memory')) {
+                    database.createObjectStore('trained_memory', { keyPath: 'id' });
+                }
+                if (!database.objectStoreNames.contains('doc_memory')) {
+                    database.createObjectStore('doc_memory', { keyPath: 'id', autoIncrement: true });
+                }
             };
         });
-    });
-}
+    }
+
+    async function getTrainedMemory() {
+        const database = await initDB();
+        return new Promise((resolve, reject) => {
+            const transaction = database.transaction(['trained_memory'], 'readonly');
+            const store = transaction.objectStore('trained_memory');
+            const request = store.getAll();
+
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function getDocMemory() {
+        const database = await initDB();
+        return new Promise((resolve, reject) => {
+            const transaction = database.transaction(['doc_memory'], 'readonly');
+            const store = transaction.objectStore('doc_memory');
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                const results = request.result || [];
+                resolve(results.map(item => item.chunk));
+            };
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function saveTrainedMemory(question, answer) {
+        const database = await initDB();
+        return new Promise((resolve, reject) => {
+            const transaction = database.transaction(['trained_memory'], 'readwrite');
+            const store = transaction.objectStore('trained_memory');
+            const item = { id: Date.now(), question, response: answer };
+            const request = store.put(item);
+
+            request.onsuccess = () => {
+                renderTrainedList();
+                resolve();
+            };
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function saveDocChunk(chunkText) {
+        const database = await initDB();
+        return new Promise((resolve, reject) => {
+            const transaction = database.transaction(['doc_memory'], 'readwrite');
+            const store = transaction.objectStore('doc_memory');
+            const request = store.add({ chunk: chunkText });
+
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function renderTrainedList() {
+        if (!trainedList) return;
+        const memory = await getTrainedMemory();
+        trainedList.innerHTML = '';
+        
+        if (memory.length === 0) {
+            trainedList.innerHTML = '<p style="font-size: 0.8rem; color: #888;">No custom data available in IndexedDB, Sir/Ma\'am.</p>';
+            return;
+        }
+        
+        memory.forEach((item) => {
+            const div = document.createElement('div');
+            div.className = 'trained-item';
+            div.innerHTML = `
+                <div class="trained-item-info">
+                    <strong>Q: ${item.question}</strong>
+                    <span>A: ${item.response}</span>
+                </div>
+                <button class="delete-q-btn" data-id="${item.id}">X</button>
+            `;
+            trainedList.appendChild(div);
+        });
+        
+        document.querySelectorAll('.delete-q-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = Number(e.target.getAttribute('data-id'));
+                const database = await initDB();
+                const transaction = database.transaction(['trained_memory'], 'readwrite');
+                const store = transaction.objectStore('trained_memory');
+                store.delete(id);
+                transaction.oncomplete = () => {
+                    renderTrainedList();
+                };
+            });
+        });
+    }
+
     // ---------------------------------------------------------
     // 5. PDF & TEXT FILE READER ENGINE
     // ---------------------------------------------------------
@@ -211,9 +201,10 @@ async function renderTrainedList() {
             const key = adminKeyInput ? adminKeyInput.value.trim() : "";
             const file = fileUploadInput && fileUploadInput.files ? fileUploadInput.files[0] : null;
 
-            if (key !== OWNER_SECRET_KEY) {
+            // FIX 2: Correct array check for authorization
+            if (!ALLOWED_ADMIN_KEYS.includes(key)) {
                 if (trainerStatus) {
-                    trainerStatus.textContent = 'Authorization Failed. Only Mr. Anirudh has clearance.';
+                    trainerStatus.textContent = 'Authorization Failed. Invalid clearance key.';
                     trainerStatus.style.color = 'red';
                 }
                 return;
@@ -235,12 +226,14 @@ async function renderTrainedList() {
                 const text = await processFile(file);
                 const chunks = text.split(/(?<=\.)\s+/); 
                 
-                chunks.forEach(chunk => {
-                    if(chunk.trim().length > 10) saveDocChunk(chunk.trim());
-                });
+                for (let chunk of chunks) {
+                    if (chunk.trim().length > 10) {
+                        await saveDocChunk(chunk.trim());
+                    }
+                }
 
                 if (trainerStatus) {
-                    trainerStatus.style.color = 'var(--success-color)';
+                    trainerStatus.style.color = 'var(--success-color, green)';
                     trainerStatus.textContent = `Success, Sir! Contents of ${file.name} integrated.`;
                 }
                 if (fileUploadInput) fileUploadInput.value = "";
@@ -254,63 +247,65 @@ async function renderTrainedList() {
     }
 
     // ---------------------------------------------------------
-// 6. CORE AI RESPONSE ENGINE (IndexedDB + Safe Fallback)
-async function generateA5Response(userQuery) {
-    const cleanQuery = userQuery.toLowerCase().trim();
-    const userWords = cleanQuery.split(/\s+/);
+    // 6. CORE AI RESPONSE ENGINE (IndexedDB + Safe Fallback)
+    // ---------------------------------------------------------
+    async function generateA5Response(userQuery) {
+        const cleanQuery = userQuery.toLowerCase().trim();
+        const userWords = cleanQuery.split(/\s+/);
 
-    // Priority 1: Exact Custom Q&A from IndexedDB
-    const customMemory = await getTrainedMemory();
-    for (let item of customMemory) {
-        if (cleanQuery.includes(item.question.toLowerCase())) {
-            return `Sir/Ma'am, as per my training: ${item.response}`;
+        // Priority 1: Exact Custom Q&A from IndexedDB
+        const customMemory = await getTrainedMemory();
+        for (let item of customMemory) {
+            if (cleanQuery.includes(item.question.toLowerCase())) {
+                return `Sir/Ma'am, as per my training: ${item.response}`;
+            }
         }
-    }
 
-    // Priority 2: Talk.js Knowledge Base
-    if (window.talkKnowledge && Array.isArray(window.talkKnowledge)) {
-        for (let item of window.talkKnowledge) {
-            if (checkKeywordsMatch(cleanQuery, item.keywords)) {
-                if (Array.isArray(item.responses)) {
-                    return getRandomResponse(item.responses);
-                } else if (item.response) {
-                    return `Yes, Sir/Ma'am. ${item.response}`;
+        // Priority 2: Talk.js Knowledge Base
+        if (window.talkKnowledge && Array.isArray(window.talkKnowledge)) {
+            for (let item of window.talkKnowledge) {
+                if (checkKeywordsMatch(cleanQuery, item.keywords)) {
+                    if (Array.isArray(item.responses)) {
+                        return getRandomResponse(item.responses);
+                    } else if (item.response) {
+                        return `Yes, Sir/Ma'am. ${item.response}`;
+                    }
                 }
             }
         }
-    }
 
-    // Priority 3: Deep Search inside IndexedDB Uploaded Documents
-    const docMemory = await getDocMemory();
-    let bestDocMatch = null;
-    let highestDocScore = 0;
+        // Priority 3: Deep Search inside IndexedDB Uploaded Documents
+        const docMemory = await getDocMemory();
+        let bestDocMatch = null;
+        let highestDocScore = 0;
 
-    for (let chunk of docMemory) {
-        let score = 0;
-        let chunkLower = chunk.toLowerCase();
-        for (let word of userWords) {
-            if (word.length > 3 && chunkLower.includes(word)) score++;
+        for (let chunk of docMemory) {
+            let score = 0;
+            let chunkLower = chunk.toLowerCase();
+            for (let word of userWords) {
+                if (word.length > 3 && chunkLower.includes(word)) score++;
+            }
+            if (score > highestDocScore) {
+                highestDocScore = score;
+                bestDocMatch = chunk;
+            }
         }
-        if (score > highestDocScore) {
-            highestDocScore = score;
-            bestDocMatch = chunk;
+
+        if (highestDocScore >= 1 && bestDocMatch) {
+            return `Sir/Ma'am, based on the documents provided to me:\n\n"${bestDocMatch}"`;
         }
+
+        // Fallback Responses
+        const fallbackResponses = [
+            "I apologize, Sir/Ma'am, but I do not have specific information regarding your query right now.",
+            "I am sorry, Sir/Ma'am, my database does not contain the answer to that yet. Please feel free to ask something else.",
+            "Forgive me, Sir/Ma'am, I am continuously learning. How else may I assist you today?"
+        ];
+        
+        return getRandomResponse(fallbackResponses);
     }
 
-    if (highestDocScore >= 1 && bestDocMatch) {
-        return `Sir/Ma'am, based on the documents provided to me:\n\n"${bestDocMatch}"`;
-    }
-
-    // Fallback Responses (Safe for Public Repository)
-    const fallbackResponses = [
-        "I apologize, Sir/Ma'am, but I do not have specific information regarding your query right now.",
-        "I am sorry, Sir/Ma'am, my database does not contain the answer to that yet. Please feel free to ask something else.",
-        "Forgive me, Sir/Ma'am, I am continuously learning. How else may I assist you today?"
-    ];
-    
-    return getRandomResponse(fallbackResponses);
-}
-
+    // ---------------------------------------------------------
     // 7. CHAT UI HANDLERS
     // ---------------------------------------------------------
     function appendMessage(text, sender) {
@@ -329,20 +324,19 @@ async function generateA5Response(userQuery) {
     }
 
     async function handleSendMessage() {
-    if (!userInput) return;
-    const text = userInput.value.trim();
-    if (!text) return;
-    
-    appendMessage(text, 'user');
-    userInput.value = '';
-    
-    const randomDelay = Math.floor(Math.random() * 500) + 400;
-    setTimeout(async () => {
-        const reply = await generateA5Response(text); // <-- Yahan await lagaya gaya hai
-        appendMessage(reply, 'assistant');
-    }, randomDelay);
-}
-
+        if (!userInput) return;
+        const text = userInput.value.trim();
+        if (!text) return;
+        
+        appendMessage(text, 'user');
+        userInput.value = '';
+        
+        const randomDelay = Math.floor(Math.random() * 500) + 400;
+        setTimeout(async () => {
+            const reply = await generateA5Response(text);
+            appendMessage(reply, 'assistant');
+        }, randomDelay);
+    }
 
     if (sendBtn) {
         sendBtn.addEventListener('click', handleSendMessage);
@@ -375,12 +369,13 @@ async function generateA5Response(userQuery) {
     }
 
     if (trainSubmitBtn) {
-        trainSubmitBtn.addEventListener('click', () => {
+        trainSubmitBtn.addEventListener('click', async () => {
             const key = adminKeyInput ? adminKeyInput.value.trim() : "";
             const q = trainQuestionInput ? trainQuestionInput.value.trim() : "";
             const a = trainAnswerInput ? trainAnswerInput.value.trim() : "";
             
-            if (key !== OWNER_SECRET_KEY) { 
+            // FIX 3: Correct array check for authorization
+            if (!ALLOWED_ADMIN_KEYS.includes(key)) { 
                 if (trainerStatus) {
                     trainerStatus.textContent = 'Authorization Failed, Sir. Invalid credentials.'; 
                     trainerStatus.style.color = 'red'; 
@@ -396,9 +391,9 @@ async function generateA5Response(userQuery) {
                 return; 
             }
             
-            saveTrainedMemory(q, a);
+            await saveTrainedMemory(q, a);
             if (trainerStatus) {
-                trainerStatus.style.color = 'var(--success-color)';
+                trainerStatus.style.color = 'var(--success-color, green)';
                 trainerStatus.textContent = 'Data successfully injected into memory, Sir!';
             }
             
