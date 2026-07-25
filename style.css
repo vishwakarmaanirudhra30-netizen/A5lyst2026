@@ -555,29 +555,36 @@ html {
     object-fit: cover; /* Image ko stretch hone se bachayega */
     border-radius: 50%;
 }
-
 /* AI Floating Button Style */
 .ai-float-btn {
     position: fixed;
-    bottom: 160px; /* Tic-Tac-Toe button ke upar set karne ke liye */
+    bottom: 160px; /* Tic-Tac-Toe button ke upar */
     right: 20px;
     z-index: 9999;
-    background: #10b981; /* Iska color aap apne hisaab se change kar sakte hain */
-    color: #ffffff;
+    /* background color remove kar dein agar logo transparent hai */
     border-radius: 50%;
     width: 55px;
     height: 55px;
-    font-size: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease, background 0.3s ease;
+    transition: transform 0.3s ease;
+    overflow: hidden; /* taaki logo circle se bahar na nikle */
 }
 
 .ai-float-btn:hover {
     transform: scale(1.1);
-    background: #059669;
 }
 
+/* Note: Agar .btn-logo class pehle hi define kar li hai Tic-Tac-Toe ke liye,
+   toh wo yahan bhi kaam karegi (logo ko button mein fit karegi).
+   Agar nahi ki hai, toh ye bhi add kar lein:
+*/
+.btn-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
