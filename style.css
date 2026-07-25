@@ -524,30 +524,38 @@ html {
   border-bottom-color: #0ea5e9;
   transform: translateX(5px);
 }
-/* Tic-Tac-Toe Floating Button Style */
+/* Tic-Tac-Toe Floating Button Style (Updated) */
 .tictactoe-float-btn {
     position: fixed;
-    bottom: 90px; /* WhatsApp button ke upar set karne ke liye (agar WhatsApp neeche hai) */
+    bottom: 90px;
     right: 20px;
     z-index: 9999;
-    background: #6366f1; /* Apni website ke theme ke hisaab se color change kar sakte hain */
-    color: #ffffff;
+    /* background color hata sakte hain agar logo transparent background wala hai, ya phir ise aise hi rehne dein */
+    background: #6366f1; 
     border-radius: 50%;
     width: 55px;
     height: 55px;
-    font-size: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s ease, background 0.3s ease;
+    overflow: hidden; /* taaki logo circle se bahar na nikle */
 }
 
 .tictactoe-float-btn:hover {
     transform: scale(1.1);
-    background: #4f46e5;
 }
+
+/* Image (Logo) Style inside button */
+.btn-logo {
+    width: 100%; /* Logo button ko pura cover karega */
+    height: 100%;
+    object-fit: cover; /* Image ko stretch hone se bachayega */
+    border-radius: 50%;
+}
+
 /* AI Floating Button Style */
 .ai-float-btn {
     position: fixed;
