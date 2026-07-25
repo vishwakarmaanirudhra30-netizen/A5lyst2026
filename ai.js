@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ---------------------------------------------------------
-    // 1. PDF.JS WORKER SETUP
+    // 1. PDF.JS WORKER SETUP.
     // ---------------------------------------------------------
     if (typeof pdfjsLib !== 'undefined') {
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
