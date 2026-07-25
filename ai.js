@@ -25,7 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const trainerStatus = document.getElementById('trainerStatus');
     const trainedList = document.getElementById('trainedList');
 
-    const OWNER_SECRET_KEY = "ani2007", "nih2007", "aryn2007";
+   const ALLOWED_ADMIN_KEYS = ["ani2007", "nih2007", "aryn2007"];
+// Check karte waqt:
+if (!ALLOWED_ADMIN_KEYS.includes(key)) { ... }
 
     // ---------------------------------------------------------
     // 3. HELPER FUNCTIONS (Randomizer & Regex Matcher)
