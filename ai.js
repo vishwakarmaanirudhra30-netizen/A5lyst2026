@@ -3,11 +3,9 @@ console.log("✅ ai.js file loaded successfully!");
 // 1. Declare Global Variables at the VERY TOP (Outside any function/event)
 var customQA = JSON.parse(localStorage.getItem('a5_custom_qa')) || [];
 var documentContext = localStorage.getItem('a5_document_context') || "";
-
+var conversationHistory = []; // Naya: Chat memory ko store karne ke liye
 
 // 2. Strict System Context (Enhanced & Stable)
-
-// 2. Strict System Context
 const A5LYST_CONTEXT = `
 [IDENTITY & BASE MODE]
 - Tum A5 ho — A5lyst.in ke official AI assistant.
@@ -125,40 +123,51 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    // 🚀 VERCEL BACKEND FETCH (Replaced config.js direct fetch)
+    // 🚀 FIXED: VERCEL BACKEND FETCH
     async function fetchAIResponse(userQuery) {
         try {
-            // We now call the local /api/chat route provided by Vercel
+            // Agar Document Context available hai toh use query me chhipa kar bhej denge
+            let contextAddOn = documentContext ? `\n\n[System Note - Extra Reference Context]: ${documentContext.substring(0, 1500)}` : "";
+            
+            // Naye message ko memory me daalo
+            conversationHistory.push({ role: "user", content: userQuery + contextAddOn });
+
+            // History bahut badi na ho, isliye sirf last 10-12 messages rakhenge
+            if(conversationHistory.length > 10) {
+                conversationHistory = conversationHistory.slice(-10);
+            }
+
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    messages: [
-                        { role: "system", content: `${A5LYST_CONTEXT}\nDocument Context: ${documentContext.substring(0, 1500)}` },
-                        { role: "user", content: userQuery }
-                    ]
+                    messages: conversationHistory
                 })
             });
 
             if (!response.ok) {
-                 const errData = await response.json();
-                 console.error("Vercel API Error:", errData);
+                 console.error("Vercel API Error:", response.status);
                  return "Sir/Ma'am, backend se connect karne me error aayi hai. Kripya thodi der baad try karein.";
             }
 
             const data = await response.json();
             
             if (data.error) {
-                console.error("Groq Error from backend:", data.error);
+                console.error("Error from backend:", data.error);
                 return `API Error: ${data.error.message || "Unknown error occurred"}`;
             }
 
-            if (data.choices && data.choices.length > 0) {
-                return data.choices[0].message.content;
+            // Yeh line backend se 'reply' ko uthayegi bina galti kiye
+            let aiReplyText = data.reply || data.response || data.message;
+
+            if (aiReplyText) {
+                // AI ke reply ko bhi history me daal denge taaki memory bani rahe
+                conversationHistory.push({ role: "assistant", content: aiReplyText });
+                return aiReplyText;
             } else {
-                return "I apologize, Sir/Ma'am, but I encountered an issue generating a response.";
+                return "I apologize, but I encountered an issue generating a response.";
             }
         } catch (error) {
             console.error("Fetch Exception:", error);
