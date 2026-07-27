@@ -1,4 +1,4 @@
- // api/chat.js
+// api/chat.js
 
 const A5LYST_CONTEXT = `
 [IDENTITY & TONE]
@@ -23,6 +23,16 @@ ONLY share team details when explicitly asked about team/roles:
 `;
 
 export default async function handler(req, res) {
+  // CORS Headers (Taki browser fetch block na kare)
+  res.setHeader("Access-Control-Allow-Credentials", true);
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
+  res.setHeader("Access-Control-Allow-Headers", "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -34,7 +44,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Invalid request payload" });
     }
 
-    // Token optimization: Last 6 messages only
+    // Token optimization: Last 6 messages only + System Context
     const recentHistory = messages.slice(-6);
     const fullPayload = [
       { role: "system", content: A5LYST_CONTEXT },
@@ -44,11 +54,10 @@ export default async function handler(req, res) {
     const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
-      return res.status(500).json({ error: "GROQ_API_KEY Environment Variable missing in Vercel" });
+      return res.status(500).json({ error: "API Key missing in Vercel" });
     }
 
-    // Direct REST API call to Groq
-    async function fetchGroqResponse(modelName) {
+    async function fetchGroq(modelName) {
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -64,23 +73,29 @@ export default async function handler(req, res) {
       });
 
       if (!response.ok) {
-        throw new Error(`Groq API Error: ${response.status}`);
+        throw new Error(`API Error: ${response.status}`);
       }
 
       const data = await response.json();
       return data.choices[0].message.content;
     }
 
+    let replyText = "";
     try {
       // 1. Try 70B Model
-      const replyText = await fetchGroqResponse("llama-3.3-70b-versatile");
-      return res.status(200).json({ reply: replyText, response: replyText });
+      replyText = await fetchGroq("llama-3.3-70b-versatile");
     } catch (primaryErr) {
-      console.warn("70B failed, switching to 8B Instant fallback...", primaryErr);
+      console.warn("70B failed, switching to 8B Instant...", primaryErr);
       // 2. Fallback to 8B Model
-      const replyText = await fetchGroqResponse("llama-3.1-8b-instant");
-      return res.status(200).json({ reply: replyText, response: replyText });
+      replyText = await fetchGroq("llama-3.1-8b-instant");
     }
+
+    // Multi-key response to avoid frontend mismatch errors
+    return res.status(200).json({ 
+      reply: replyText, 
+      response: replyText,
+      message: replyText 
+    });
 
   } catch (err) {
     console.error("Backend Error:", err);
