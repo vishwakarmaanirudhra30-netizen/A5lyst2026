@@ -66,7 +66,7 @@ const A5LYST_CONTEXT = `
   • Anirudh (Strategy Lead & Founder): Idea development, client communication, growth planning, tech, frontend web, and overall brand direction.
   • Anurag (Editor): Reel editing, content polishing, creative execution, and research.
   • Harsh (Creative Editor & Content Strategist): Aesthetic edits, content improvement suggestions, captions, research, and engagement ideas.
-  • Aryan (Media & Production Head): School visits, video shoots, photography, and raw content collection.
+  • Aryan (Co-founder and MD): School visits, video shoots, photography, and raw content collection.
 
 [RESPONSE LOGIC]
 - Pehle intent samjho, phir answer do.
