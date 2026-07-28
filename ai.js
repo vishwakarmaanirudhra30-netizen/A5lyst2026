@@ -106,10 +106,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const trainedList = document.getElementById('trainedList');
     const ADMIN_KEY = "Anirudh"; // Kept Anirudh as the admin key
 
+    // 🔊 Voice Synthesis Engine (Naya Function Add Kiya)
+    function speakText(text, btnElement) {
+        if (!('speechSynthesis' in window)) {
+            alert("Aapka browser text-to-speech support nahi karta.");
+            return;
+        }
+
+        // Agar pehle se bol raha hai toh dobara click karne par STOP ho jayega
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+            btnElement.innerText = "🔊";
+            return;
+        }
+
+        // Emojis aur special symbols ko hata rahe hain taaki bolte waqt ajeeb na lage
+        const cleanText = text.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|\*|#|_)/g, '');
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'hi-IN'; // Hindi/Hinglish accent
+        utterance.rate = 1.0;     // Speed (1.0 = normal)
+        utterance.pitch = 1.0;    // Voice pitch
+
+        utterance.onend = () => { btnElement.innerText = "🔊"; };
+        utterance.onerror = () => { btnElement.innerText = "🔊"; };
+
+        // Play karte waqt button change hoga
+        btnElement.innerText = "⏹️";
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // 🔊 Append Message Function Updated for Voice Button
     function appendMessage(text, sender) {
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${sender}-message`;
-        msgDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
+        
+        if (sender === 'assistant') {
+            // AI ke message me 🔊 button add hoga
+            msgDiv.innerHTML = `
+                <div class="message-bubble">${text}</div>
+                <button class="voice-btn" title="Sunne ke liye click karein">🔊</button>
+            `;
+            
+            // Button par click event safe tareeke se add kar rahe hain
+            const voiceBtn = msgDiv.querySelector('.voice-btn');
+            voiceBtn.addEventListener('click', function() {
+                speakText(text, this);
+            });
+        } else {
+            // User ke message me normal bubble
+            msgDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
+        }
+        
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
