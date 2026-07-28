@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const trainedList = document.getElementById('trainedList');
     const ADMIN_KEY = "Anirudh"; // Kept Anirudh as the admin key
 
-    // 🔊 Voice Synthesis Engine (Naya Function Add Kiya)
+      // 🔊 Voice Synthesis Engine (Updated for Male Voice)
     function speakText(text, btnElement) {
         if (!('speechSynthesis' in window)) {
             alert("Aapka browser text-to-speech support nahi karta.");
@@ -120,13 +120,35 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Emojis aur special symbols ko hata rahe hain taaki bolte waqt ajeeb na lage
+        // Emojis aur special symbols ko hata rahe hain
         const cleanText = text.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|\*|#|_)/g, '');
 
         const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.lang = 'hi-IN'; // Hindi/Hinglish accent
-        utterance.rate = 1.0;     // Speed (1.0 = normal)
-        utterance.pitch = 1.0;    // Voice pitch
+        utterance.lang = 'hi-IN'; // Default language
+        utterance.rate = 1.0;
+        
+        // Pitch halka sa kam karne se awaaz thodi bhari (manly) lagti hai agar female voice bhi ho
+        utterance.pitch = 0.9;    
+
+        // --- 🤖 MALE VOICE DHOONDHNE KA LOGIC ---
+        const voices = window.speechSynthesis.getVoices();
+        
+        // Pehle try karenge Hindi/Indian English me 'Male' ya 'Madhur' (Windows default male) dhoondhne ki
+        let maleVoice = voices.find(voice => 
+            (voice.lang.includes('hi') || voice.lang.includes('en-IN')) && 
+            (voice.name.toLowerCase().includes('male') || voice.name.toLowerCase().includes('madhur'))
+        );
+
+        // Agar Indian male nahi mila, toh koi bhi male voice try karenge
+        if (!maleVoice) {
+            maleVoice = voices.find(voice => voice.name.toLowerCase().includes('male'));
+        }
+
+        // Agar device me male voice mili, toh use set kar denge
+        if (maleVoice) {
+            utterance.voice = maleVoice;
+        }
+        // ----------------------------------------
 
         utterance.onend = () => { btnElement.innerText = "🔊"; };
         utterance.onerror = () => { btnElement.innerText = "🔊"; };
@@ -135,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnElement.innerText = "⏹️";
         window.speechSynthesis.speak(utterance);
     }
+
 
     // 🔊 Append Message Function Updated for Voice Button
     function appendMessage(text, sender) {
