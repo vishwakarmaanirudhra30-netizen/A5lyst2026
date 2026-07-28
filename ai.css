@@ -459,3 +459,42 @@ body {
 .trainer-panel.hidden {
     display: none !important;
 }
+/* =========================================
+   🔊 Voice Play/Stop Button Styling
+   ========================================= */
+
+.voice-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;          /* Icon ka size */
+    padding: 6px;
+    margin-top: 5px;
+    margin-left: 2px;
+    border-radius: 50%;       /* Hover par gol (circular) background ke liye */
+    opacity: 0.7;             /* Thoda transparent rakha hai taaki distracting na lage */
+    transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hover Effect (Jab mouse button par jayega) */
+.voice-btn:hover {
+    opacity: 1;
+    transform: scale(1.15);   /* Halka sa bada hoga */
+    background-color: rgba(0, 0, 0, 0.08); /* Hover par halka grey background */
+}
+
+/* Click Effect (Jab user click karega) */
+.voice-btn:active {
+    transform: scale(0.95);   /* Click hone par halka sa dabega */
+}
+
+/* Dark mode compatibility (Agar aapki website me dark theme hai) */
+@media (prefers-color-scheme: dark) {
+    .voice-btn:hover {
+        background-color: rgba(255, 255, 255, 0.15); /* Dark mode me light hover */
+    }
+}
+
