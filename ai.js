@@ -6,7 +6,6 @@ var documentContext = localStorage.getItem('a5_document_context') || "";
 var conversationHistory = [];
 
 
-
 // 2. Strict System Context (Enhanced & Stable)
 const A5LYST_CONTEXT = `
 [IDENTITY & BASE MODE]
