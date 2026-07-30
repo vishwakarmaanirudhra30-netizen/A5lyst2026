@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 conversationHistory = conversationHistory.slice(-10);
             }
 
-            const response = await fetch('/api/chat', {
+            const response = await fetch('[https://a5lyst.in/api/chat](https://a5lyst.in/api/chat)', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json'
