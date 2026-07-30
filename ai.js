@@ -1,15 +1,10 @@
 console.log("✅ ai.js file loaded successfully!");
 
-// Safe LocalStorage Loading for In-App Browsers
-var customQA = [];
-var documentContext = "";
+// 1. Declare Global Variables at the VERY TOP (Outside any function/event)
+var customQA = JSON.parse(localStorage.getItem('a5_custom_qa')) || [];
+var documentContext = localStorage.getItem('a5_document_context') || "";
+var conversationHistory = [];
 
-try {
-    customQA = JSON.parse(localStorage.getItem('a5_custom_qa')) || [];
-    documentContext = localStorage.getItem('a5_document_context') || "";
-} catch (e) {
-    console.warn("Storage restricted by browser:", e);
-}
 
 
 // 2. Strict System Context (Enhanced & Stable)
