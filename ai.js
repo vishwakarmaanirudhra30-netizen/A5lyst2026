@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.speechSynthesis.speak(utterance);
     }
 
-    // 🔊 Append Message Function Updated for Voice Button
+       // 🔊 Append Message Function (With Smooth Auto-Scroll Fix)
     function appendMessage(text, sender) {
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${sender}-message`;
@@ -175,7 +175,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         chatMessages.appendChild(msgDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // 🚀 SMART SCROLL: 50ms ka delay taaki UI theek se render ho jaye, uske baad scroll ho
+        setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Optional fallback: Naye message ko smoothly screen par focus karne ke liye
+            msgDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 50);
     }
 
     function checkLocalMemory(query) {
@@ -237,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Main Handler 
+        // Main Handler (With 1.5 Second Delay)
     async function handleSend() {
         const text = userInput.value.trim();
         if (!text) return;
@@ -245,17 +252,27 @@ document.addEventListener('DOMContentLoaded', () => {
         appendMessage(text, 'user');
         userInput.value = '';
 
+        // 1. Jaise hi user message bheje, turant 'thinking' status dikhao
+        appendMessage("A5 is processing...", 'thinking');
+
+        // 🕒 2. Yahan AI 1.5 seconds (1500ms) tak sochega
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // 3. Sochne ke baad memory check karega ya backend se API call karega
         let responseText = checkLocalMemory(text);
 
         if (!responseText) {
-            appendMessage("A5 is processing...", 'thinking');
             responseText = await fetchAIResponse(text);
-            const thinkingMsg = document.querySelector('.thinking-message');
-            if (thinkingMsg) thinkingMsg.remove();
         }
 
+        // 4. Jawab aane ke baad 'thinking' message ko hata do
+        const thinkingMsg = document.querySelector('.thinking-message');
+        if (thinkingMsg) thinkingMsg.remove();
+
+        // 5. Final jawab screen par dikha do
         appendMessage(responseText, 'assistant');
     }
+
 
     // Listeners
     if (sendBtn) sendBtn.addEventListener('click', handleSend);
