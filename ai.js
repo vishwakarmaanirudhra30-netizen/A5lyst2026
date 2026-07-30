@@ -1,10 +1,16 @@
 console.log("✅ ai.js file loaded successfully!");
 
-// 1. Declare Global Variables at the VERY TOP (Outside any function/event)
-var customQA = JSON.parse(localStorage.getItem('a5_custom_qa')) || [];
-var documentContext = localStorage.getItem('a5_document_context') || "";
+// 1. Declare Global Variables at the VERY TOP (Safe for all browsers including Instagram)
+var customQA = [];
+var documentContext = "";
 var conversationHistory = [];
 
+try {
+    customQA = JSON.parse(localStorage.getItem('a5_custom_qa')) || [];
+    documentContext = localStorage.getItem('a5_document_context') || "";
+} catch (e) {
+    console.warn("Storage restricted by browser (Instagram/Incognito):", e);
+}
 
 // 2. Strict System Context (Enhanced & Stable)
 const A5LYST_CONTEXT = `
@@ -108,58 +114,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const trainedList = document.getElementById('trainedList');
     const ADMIN_KEY = "Anirudh"; // Kept Anirudh as the admin key
 
-      // 🔊 Voice Synthesis Engine (Updated for Male Voice)
+    // 🔊 Voice Synthesis Engine (Updated for Male Voice)
     function speakText(text, btnElement) {
         if (!('speechSynthesis' in window)) {
             alert("Aapka browser text-to-speech support nahi karta.");
             return;
         }
 
-        // Agar pehle se bol raha hai toh dobara click karne par STOP ho jayega
         if (window.speechSynthesis.speaking) {
             window.speechSynthesis.cancel();
             btnElement.innerText = "🔊";
             return;
         }
 
-        // Emojis aur special symbols ko hata rahe hain
         const cleanText = text.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|\*|#|_)/g, '');
 
         const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.lang = 'hi-IN'; // Default language
+        utterance.lang = 'hi-IN';
         utterance.rate = 1.0;
-        
-        // Pitch halka sa kam karne se awaaz thodi bhari (manly) lagti hai agar female voice bhi ho
         utterance.pitch = 0.9;    
 
-        // --- 🤖 MALE VOICE DHOONDHNE KA LOGIC ---
         const voices = window.speechSynthesis.getVoices();
         
-        // Pehle try karenge Hindi/Indian English me 'Male' ya 'Madhur' (Windows default male) dhoondhne ki
         let maleVoice = voices.find(voice => 
             (voice.lang.includes('hi') || voice.lang.includes('en-IN')) && 
             (voice.name.toLowerCase().includes('male') || voice.name.toLowerCase().includes('madhur'))
         );
 
-        // Agar Indian male nahi mila, toh koi bhi male voice try karenge
         if (!maleVoice) {
             maleVoice = voices.find(voice => voice.name.toLowerCase().includes('male'));
         }
 
-        // Agar device me male voice mili, toh use set kar denge
         if (maleVoice) {
             utterance.voice = maleVoice;
         }
-        // ----------------------------------------
 
         utterance.onend = () => { btnElement.innerText = "🔊"; };
         utterance.onerror = () => { btnElement.innerText = "🔊"; };
 
-        // Play karte waqt button change hoga
         btnElement.innerText = "⏹️";
         window.speechSynthesis.speak(utterance);
     }
-
 
     // 🔊 Append Message Function Updated for Voice Button
     function appendMessage(text, sender) {
@@ -167,19 +162,15 @@ document.addEventListener('DOMContentLoaded', () => {
         msgDiv.className = `message ${sender}-message`;
         
         if (sender === 'assistant') {
-            // AI ke message me 🔊 button add hoga
             msgDiv.innerHTML = `
                 <div class="message-bubble">${text}</div>
                 <button class="voice-btn" title="Sunne ke liye click karein">🔊</button>
             `;
-            
-            // Button par click event safe tareeke se add kar rahe hain
             const voiceBtn = msgDiv.querySelector('.voice-btn');
             voiceBtn.addEventListener('click', function() {
                 speakText(text, this);
             });
         } else {
-            // User ke message me normal bubble
             msgDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
         }
         
@@ -197,21 +188,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    // 🚀 FIXED: VERCEL BACKEND FETCH
+    // 🚀 FIXED: VERCEL BACKEND FETCH (Proper URL format)
     async function fetchAIResponse(userQuery) {
         try {
-            // Agar Document Context available hai toh use query me chhipa kar bhej denge
             let contextAddOn = documentContext ? `\n\n[System Note - Extra Reference Context]: ${documentContext.substring(0, 1500)}` : "";
             
-            // Naye message ko memory me daalo
             conversationHistory.push({ role: "user", content: userQuery + contextAddOn });
 
-            // History bahut badi na ho, isliye sirf last 10-12 messages rakhenge
             if(conversationHistory.length > 10) {
                 conversationHistory = conversationHistory.slice(-10);
             }
 
-            const response = await fetch('[https://a5lyst.in/api/chat](https://a5lyst.in/api/chat)', {
+            // FIXED: Removed markdown formatting from the URL
+            const response = await fetch('https://a5lyst.in/api/chat', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json'
@@ -233,11 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 return `API Error: ${data.error.message || "Unknown error occurred"}`;
             }
 
-            // Yeh line backend se 'reply' ko uthayegi bina galti kiye
             let aiReplyText = data.reply || data.response || data.message;
 
             if (aiReplyText) {
-                // AI ke reply ko bhi history me daal denge taaki memory bani rahe
                 conversationHistory.push({ role: "assistant", content: aiReplyText });
                 return aiReplyText;
             } else {
