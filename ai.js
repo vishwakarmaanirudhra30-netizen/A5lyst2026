@@ -200,7 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // FIXED: Removed markdown formatting from the URL
-            const response = await fetch('https://a5lyst.in/api/chat', {
+            const response = await fetch(window.location.origin + '/api/chat', {
+
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json'
