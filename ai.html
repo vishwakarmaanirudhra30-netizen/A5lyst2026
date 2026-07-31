@@ -2,101 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A5 - Premium Digital Assistant</title>
+    <!-- 🔥 Yeh tag sabse zaroori hai Mobile Keyboard Gap aur Bounce fix karne ke liye -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+    <title>A5 - 3D Intelligence Console</title>
     
     <!-- CSS Link -->
     <link rel="stylesheet" href="ai.css">
     
-    <!-- Google Fonts for Premium Tech Typography -->
+    <!-- Premium Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- PDF.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 </head>
 <body>
 
-    <!-- Animated Background Elements -->
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-    <div class="bg-overlay"></div>
-
+    <!-- 3D App Console -->
     <div class="app-container">
-        <!-- Top Glass Header -->
+        
+        <!-- 3D Header -->
         <header class="app-header">
             <div class="brand">
-                <div class="status-ring">
-                    <div class="status-dot"></div>
-                </div>
-                <h1>A5 Assistant</h1>
+                <div class="physical-light-indicator"></div>
+                <h1>A5 Console</h1>
             </div>
-            <!-- Glass Pill Button -->
-            <button id="trainerToggleBtn" class="trainer-toggle-btn">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; display: inline-block; vertical-align: text-bottom;">
+            <!-- Tactile 3D Button -->
+            <button id="trainerToggleBtn" class="tactile-btn small-btn">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;">
                     <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                 </svg>
-                Brain Console
+                Brain
             </button>
         </header>
 
         <!-- Main Chat Area -->
         <main class="chat-container">
             <div id="chatMessages" class="chat-messages">
-                <!-- Initial Welcome Message -->
                 <div class="message assistant-message">
-                    <div class="message-bubble">
+                    <div class="message-bubble 3d-bot-bubble">
                         Greetings, Sir/Ma'am. Welcome to A5lyst. How may I assist you today?
                     </div>
                 </div>
             </div>
 
-            <!-- Trainer/Admin Glass Panel (Hidden by default) -->
+            <!-- Trainer Panel (3D Overlay) -->
             <div id="trainerPanel" class="trainer-panel hidden">
-                <div class="trainer-panel-inner">
+                <div class="trainer-panel-inner 3d-panel">
                     <div class="trainer-header">
-                        <h3><span class="gradient-text">A5</span> Intelligence Terminal</h3>
-                        <button id="closeTrainer" class="close-btn">&times;</button>
+                        <h3>Admin Terminal</h3>
+                        <button id="closeTrainer" class="tactile-btn icon-btn">&times;</button>
                     </div>
                     
                     <div class="trainer-body">
-                        <input type="password" id="adminKeyInput" placeholder="Enter Administrative Key..." class="glass-input" />
+                        <input type="password" id="adminKeyInput" placeholder="Auth Key..." class="recessed-input" />
                         
-                        <div class="train-section">
-                            <p class="section-label">Manual Data Injection (Q&A):</p>
-                            <input type="text" id="trainQuestionInput" placeholder="User Query (e.g., Pricing plans?)" class="glass-input" />
-                            <textarea id="trainAnswerInput" placeholder="Formal AI Response..." class="glass-input"></textarea>
-                            <button id="trainSubmitBtn" class="glow-btn">Inject Knowledge</button>
+                        <div class="train-section recessed-panel">
+                            <p class="section-label">Manual Data Entry:</p>
+                            <input type="text" id="trainQuestionInput" placeholder="Query..." class="recessed-input" />
+                            <textarea id="trainAnswerInput" placeholder="Response..." class="recessed-input"></textarea>
+                            <button id="trainSubmitBtn" class="tactile-btn accent-btn">Inject Data</button>
                         </div>
 
-                        <div class="train-section file-upload-section">
-                            <p class="section-label">Document Ingestion (PDF / TXT):</p>
-                            <div class="file-input-wrapper">
-                                <input type="file" id="fileUploadInput" accept=".txt, .pdf" />
-                            </div>
-                            <button id="trainFileBtn" class="glow-btn secondary-glow">Process Document</button>
+                        <div class="train-section recessed-panel">
+                            <p class="section-label">Document Scan (PDF/TXT):</p>
+                            <input type="file" id="fileUploadInput" accept=".txt, .pdf" class="recessed-input file-input" />
+                            <button id="trainFileBtn" class="tactile-btn accent-btn">Process File</button>
                         </div>
-
                         <p id="trainerStatus" class="trainer-status"></p>
                     </div>
 
                     <div class="trained-list-container">
-                        <h4>Custom Memory Base</h4>
-                        <div id="trainedList" class="trained-list">
-                            <!-- JS Dynamic List -->
-                        </div>
+                        <h4 class="section-label">Memory Core</h4>
+                        <div id="trainedList" class="trained-list"></div>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Floating Chat Input Area -->
+        <!-- 3D Input Footer -->
         <footer class="chat-input-area">
-            <div class="input-glass-panel">
-                <input type="text" id="userInput" placeholder="Ask A5 anything..." autocomplete="off">
-                <button id="sendBtn" class="send-btn">
-                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Yeh physical hardware panel jaisa dikhega -->
+            <div class="recessed-input-wrapper">
+                <input type="text" id="userInput" placeholder="Type command..." autocomplete="off">
+                <button id="sendBtn" class="tactile-btn send-btn-3d">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="22" y1="2" x2="11" y2="13"></line>
                         <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                     </svg>
