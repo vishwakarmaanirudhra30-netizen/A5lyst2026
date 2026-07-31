@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         appendMessage("A5 is processing...", 'thinking');
 
         // 🕒 2. Yahan AI 1.5 seconds (1500ms) tak sochega
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 999));
 
         // 3. Sochne ke baad memory check karega ya backend se API call karega
         let responseText = checkLocalMemory(text);
