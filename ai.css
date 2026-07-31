@@ -351,9 +351,7 @@ textarea.recessed-input {
 }
 
 /* =========================================
-   📱 Mobile Viewport Fix Adjustments
-   ========================================= */
-@media (max-width: 768px) {
+ @media (max-width: 768px) {
     .app-container {
         height: 100%;
         height: -webkit-fill-available;
@@ -375,10 +373,19 @@ textarea.recessed-input {
     
     .message { max-width: 90%; }
     
-    .trainer-panel { padding: 0; }
+    /* 🔥 YAHAN SE FIX START HOTA HAI 🔥 */
+    .trainer-panel { 
+        padding: 15px; 
+        align-items: flex-start; /* Yeh input box ko upar gayab hone se rokega */
+        overflow-y: auto; /* Keyboard aane par bahar ka area scrollable banayega */
+        padding-top: max(15px, env(safe-area-inset-top)); 
+    }
+    
     .3d-panel {
-        height: 100%;
-        border-radius: 0;
-        box-shadow: none;
+        height: auto; /* 100% ki jagah content ke hisaab se height lega */
+        max-height: 100%;
+        border-radius: 16px; /* Wapas premium round look dega */
+        overflow-y: auto; /* Andar ki cheezein scroll karne dega */
+        padding: 20px 15px;
     }
 }
