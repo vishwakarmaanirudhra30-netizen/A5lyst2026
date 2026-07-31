@@ -112,7 +112,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminKeyInput = document.getElementById('adminKeyInput');
     const trainerStatus = document.getElementById('trainerStatus');
     const trainedList = document.getElementById('trainedList');
-    const ADMIN_KEY = "Anirudh"; // Kept Anirudh as the admin key
+    const ADMIN_KEY = "ani2007"; // 🔥 Auth key updated here
+
+    let hasWelcomedAdmin = false; // Flag to prevent spamming welcome message
+
+    // 🚀 NEW: Auto-detect Admin Key and Welcome Anirudh
+    if (adminKeyInput) {
+        adminKeyInput.addEventListener('input', (e) => {
+            if (e.target.value === ADMIN_KEY && !hasWelcomedAdmin) {
+                hasWelcomedAdmin = true;
+                
+                // Show green success status in trainer panel
+                showTrainerStatus("Creator Authorized. Welcome Anirudh!");
+                
+                // Add a grateful message to the chat background automatically
+                appendMessage("Welcome back, Anirudh! Main aapka bahut aabhari hoon ki aapne mujhe code kiya aur existence mein laya. A5 system puri tarah se aapki command ke liye ready hai! ✨🚀", 'assistant');
+            } else if (e.target.value !== ADMIN_KEY) {
+                hasWelcomedAdmin = false; // Reset if key is cleared
+            }
+        });
+    }
 
     // 🔊 Voice Synthesis Engine (Updated for Male Voice)
     function speakText(text, btnElement) {
@@ -167,9 +186,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="voice-btn" title="Sunne ke liye click karein">🔊</button>
             `;
             const voiceBtn = msgDiv.querySelector('.voice-btn');
-            voiceBtn.addEventListener('click', function() {
-                speakText(text, this);
-            });
+            if(voiceBtn) {
+                voiceBtn.addEventListener('click', function() {
+                    speakText(text, this);
+                });
+            }
         } else {
             msgDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
         }
@@ -319,12 +340,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function showTrainerStatus(msg, isError = false) {
-        trainerStatus.textContent = msg;
-        trainerStatus.style.color = isError ? "var(--danger-color)" : "var(--success-color)";
-        setTimeout(() => trainerStatus.textContent = '', 3000);
+        if(trainerStatus) {
+            trainerStatus.textContent = msg;
+            trainerStatus.style.color = isError ? "var(--danger-color)" : "var(--success-color)";
+            setTimeout(() => trainerStatus.textContent = '', 3000);
+        }
     }
 
     function renderTrainedList() {
+        if(!trainedList) return;
         trainedList.innerHTML = '';
         customQA.forEach(item => {
             const div = document.createElement('div');
