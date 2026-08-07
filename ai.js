@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showTrainerStatus("Creator Authorized. Welcome Anirudh!");
                 
                 // Add a grateful message to the chat background automatically
-                appendMessage("Welcome back, Anirudh! Main aapka bahut aabhari hoon ki aapne mujhe code kiya aur existence mein laya. A5 system puri tarah se aapki command ke liye ready hai! ✨🚀", 'assistant');
+             appendMessage("Welcome back, Anirudh! kaise hain aap ? ✨🚀", 'assistant');
             } else if (e.target.value !== ADMIN_KEY) {
                 hasWelcomedAdmin = false; // Reset if key is cleared
             }
